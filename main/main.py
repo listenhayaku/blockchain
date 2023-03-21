@@ -252,6 +252,8 @@ def retriever(node):
                     if(counter > int(anc_tail)-int(anc_head)):  #1~10 10-1=9 counter > 9, counter = 10
                         blockchain.others_ledge_verify()
 
+            elif data["msg"]["tag"] == "data":
+                print("(debug)[main.retriever]data:",data["msg"]["content"])
             ##print("[main.retriever]appendix:",data["msg"]["appendix"])
             #print("[main.retriever]miner is ",appendix.miner(data["msg"]["appendix"]),",spec is:",sudoku().spec(data["msg"]["appendix"]))
         
@@ -288,10 +290,13 @@ def new_block(auto = False):
 
 def send_data():
     ret = data_parser.Check()
-    if(ret == False): return False
+    if(ret == False):
+        print("(debug)[main.send_data]enter where i don't want")
+        return False
     else:
+        print("(deubg)[main.send_data]enter where i want")
         for line in ret:
-            pass
+            node.broadcast("data//"+line+"//appendix//test")
     return True
 
 def pause(para = 0b001):    # (reserve) (reserve) (1 broadcast; 0 don't broadcast)
@@ -332,6 +337,8 @@ def ShowStatus():
         "\n\tPAUSE:",PAUSE,
         sep="")
     blockchain.ShowStatus(1)
+
+#def WriteLog(strFileName,strLogInfo):
 
 if __name__ == "__main__":
     init()
@@ -382,6 +389,8 @@ if __name__ == "__main__":
             buf = f.read()
             print("(debug)[main loop]buf:\n",buf)
             node.broadcast(buf)
+        elif(msg == "data"):
+            send_data()
         else:
             pass
         node.broadcast(msg)

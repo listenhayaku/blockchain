@@ -1,7 +1,7 @@
 
 class DataParser():
     def __init__(self):
-        self.FileName = "bug.txt"
+        self.FileName = "data.bin.txt"
     def Check(self):    #檢查內容 無的話回傳False有的話直接回傳list
         try:
             with open(self.FileName,"r") as f:

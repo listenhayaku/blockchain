@@ -46,7 +46,10 @@ def specification(sMsg):
                 return {"tag":"ledge","content":block,"appendix":appendix}
             else:
                 return False
-        
+        elif(lMsg[0] == "data"):
+            return {"tag":"data","content":lMsg[1],"appendix":appendix}
+
+
         #else:return lMsg
         else:return False
 
