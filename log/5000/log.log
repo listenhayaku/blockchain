@@ -1,0 +1,14 @@
+ip and port: 172.30.7.199 5000
+[main.init]__name__ =  __main__
+[node.client_init]connect done!
+[node.client_init]connect done!
+[node.client_init]connect done!
+[server_listen]accept  ('172.30.7.199', 1668)
+[server_listen]accept  ('172.30.7.199', 1671)
+[server_listen]accept  ('172.30.7.199', 1674)
+(debug)[Set_malicious_score]node: <node.Node object at 0x000001A453A50BB0>
+(debug)[Set_malicious_score]malicious_score: [{'client': <socket.socket fd=1164, family=AddressFamily.AF_INET, type=SocketKind.SOCK_STREAM, proto=0, laddr=('172.30.7.199', 5000), raddr=('172.30.7.199', 1668)>, 'score': 0}, {'client': <socket.socket fd=1244, family=AddressFamily.AF_INET, type=SocketKind.SOCK_STREAM, proto=0, laddr=('172.30.7.199', 5000), raddr=('172.30.7.199', 1671)>, 'score': 0}, {'client': <socket.socket fd=1252, family=AddressFamily.AF_INET, type=SocketKind.SOCK_STREAM, proto=0, laddr=('172.30.7.199', 5000), raddr=('172.30.7.199', 1674)>, 'score': 0}]
+
+======init done======
+
+^C

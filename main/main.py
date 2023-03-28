@@ -118,7 +118,7 @@ def init():
         port = 5002
         node.client_init(port)
     else:
-        print("[main.init]unknown error!")
+        print("[main.init]node.server_port is not in list!")
 
     time.sleep(5)
     '''debug
@@ -256,7 +256,8 @@ def retriever(node):
                 print("(debug)[main.retriever]data:",data["msg"]["content"])
             ##print("[main.retriever]appendix:",data["msg"]["appendix"])
             #print("[main.retriever]miner is ",appendix.miner(data["msg"]["appendix"]),",spec is:",sudoku().spec(data["msg"]["appendix"]))
-        
+            elif data["msg"]["tag"] == "groundstation":
+                pass
         else:
             print("[retriever]:data is not type dict")
 
@@ -338,7 +339,6 @@ def ShowStatus():
         sep="")
     blockchain.ShowStatus(1)
 
-#def WriteLog(strFileName,strLogInfo):
 
 if __name__ == "__main__":
     init()
@@ -391,8 +391,11 @@ if __name__ == "__main__":
             node.broadcast(buf)
         elif(msg == "data"):
             send_data()
+        elif(msg == "test"):
+            node.send_to_groundstation()
         else:
             pass
+
         node.broadcast(msg)
 
     blockchain.write_log(port = node.server_port,bDebug=False,show=False)   #auto show blockchain

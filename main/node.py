@@ -135,10 +135,15 @@ class Node():
                 except:
                     print("[server_retriever]error")
         return None
+
+    def server_send(self,msg = "",client = ""):
+        print("(debug)[node.server_send]start")
+        print("(debug)[node.server_send]server_list_client[0]",self.server_list_client[0])
+        self.server_list_client[0].send("(debug)[node.server_send]start".encode("utf-8"))
+        pass
 #server
 #==============================================
 #client
-
     def client_init(self,port = None):
         client = socket.socket(socket.AF_INET,socket.SOCK_STREAM)
         while 1:
@@ -188,13 +193,31 @@ class Node():
         except:
             print("[client_send]error")
     
+    def client_del(self,client = ""):
+        if(client == ""):
+            print("(error)[client_del]didn't recv client parameter")
+            return False
+        try:
+            self.client_list_server.remove(client)
+            return True
+        except:
+            print("[client_del]error")
+            return False        
+
     def broadcast(self,msg = ""):
         for _ in self.client_list_server:
             self.client_send(msg,_)
 #client
 #==============================================
 #others
-    
+    def send_to_groundstation(self,msg = "",client = ""):
+        pass
+        self.server_send()
+        #if(client == ""):
+            #print("[node.send_to_groundstation]no pass client!")
+        #else:
+            #self.server_send()
+
     def stop(self):
         self.server_list_client = []
         self.client_list_server = []
