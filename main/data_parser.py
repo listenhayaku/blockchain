@@ -15,6 +15,7 @@ class DataParser():
             ret = []
             for line in listFileContext:
                 if(line[24:27] == "GPS"): ret.append(line)
+                elif(line[24:27] == "BAT"): ret.append(line)
             return ret
         except Exception as e:
             print("(exception)[DataParser.Parser]e:",e)

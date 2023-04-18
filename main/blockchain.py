@@ -366,11 +366,11 @@ class Blockchain():
         if(node == None):
             print("(error)[Set_malicious_score]")
             return False
-        print("(debug)[Set_malicious_score]node:",node)
+        #print("(debug)[Set_malicious_score]node:",node)
         self.malicious_score = [] #先清空 讓這個方法可以用作renew
         for x in node.server_list_client:
             self.malicious_score.append({"client":x,"score":0})
-        print("(debug)[Set_malicious_score]malicious_score:",self.malicious_score)
+        #print("(debug)[Set_malicious_score]malicious_score:",self.malicious_score)
 
     def Inc_malicious_score(self,client = None):
         if(client == None):
@@ -382,8 +382,8 @@ class Blockchain():
         for x in self.malicious_score:
             if(x["client"] == client):
                 i = self.malicious_score.index(x)
-        print("(debug)[Inc_malicious_score]i:",i)
-        print("(deubg)[Inc_malicious_score]self.malicious_score:",self.malicious_score)
+        #print("(debug)[Inc_malicious_score]i:",i)
+        #print("(deubg)[Inc_malicious_score]self.malicious_score:",self.malicious_score)
         if(i != -1): self.malicious_score[i]["score"] += 5
 
     def MinusAll_malicious_score(self,score = 0):

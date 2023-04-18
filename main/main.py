@@ -1,20 +1,20 @@
-from msilib.schema import Error
-from typing import overload
+#from msilib.schema import Error
+#from typing import overload
 from node import Node
 from blockchain import Blockchain
 from block import Block
 from data_parser import DataParser
 import time
 import threading
-import appendix
-import os
+#import appendix
+#import os
 import socket
 import random
-import inspect
+#import inspect
 
 import winsound
 
-from numba import jit, cuda
+#from numba import jit, cuda
 
 '''
 import os
@@ -187,7 +187,12 @@ def retriever(node):
             break
 
         if(type(data) == dict):
-            print("[retriever]",data)
+            #print("[retriever]",data)
+            print("(info)[retriever]\n\ttag:",data["msg"]["tag"],
+                "\n\tcontent:",data["msg"]["content"],
+                "\n\tappendix:",data["msg"]["appendix"])
+            
+
             if data["msg"]["tag"] == "block":
                 #print("[retriever]:data is block type")
                 #data["msg"]["content"].print_block("call by block")
@@ -258,6 +263,17 @@ def retriever(node):
             #print("[main.retriever]miner is ",appendix.miner(data["msg"]["appendix"]),",spec is:",sudoku().spec(data["msg"]["appendix"]))
             elif data["msg"]["tag"] == "groundstation":
                 pass
+            elif data["msg"]["tag"] == "require":
+                print("(debug)[retriever]require:",data["msg"]["content"])
+                if(data["msg"]["content"] == "test"): send_data(data["source"])
+                elif(data["msg"]["content"] == "who"):
+                    print("(debug)[retriever]who")
+                    print("(debug)[retriever]require who source:",data["source"])
+                    ResponseWho(data["source"])
+                pass
+            elif data["msg"]["tag"] == "response":
+                pass
+                print("(debug)[retriever]tag:response")
         else:
             print("[retriever]:data is not type dict")
 
@@ -265,7 +281,10 @@ def retriever(node):
         for x in blockchain.malicious_score:
             if(x["score"] > 100):
                 node.server_del_client(x["client"])
-                blockchain.Set_malicious_score()
+                tempclient = x["client"]
+                name = node.GetPeerNameBySocket(tempclient)
+                node.send_to_groundstation("ignore//"+name)
+                blockchain.Set_malicious_score(node)    #因為前面先刪掉node的表所以呼叫這個可以重新配置malicious_score
         pass
 
 def new_block(auto = False):
@@ -289,15 +308,24 @@ def new_block(auto = False):
             else: break
             time.sleep(0.3)
 
-def send_data():
+def send_data(client = None):
     ret = data_parser.Check()
     if(ret == False):
-        print("(debug)[main.send_data]enter where i don't want")
+        #print("(debug)[main.send_data]enter where i don't want")
+        return False
+    elif(type(client) != socket.socket and client != None):
         return False
     else:
-        print("(deubg)[main.send_data]enter where i want")
+        #print("(deubg)[main.send_data]enter where i want")
         for line in ret:
-            node.broadcast("data//"+line+"//appendix//test")
+            if(client == None):
+                print("(debug)[send_data]broadcast")
+                node.broadcast("data//"+line+"//appendix//test")
+            else:
+                print("(debug)[send_data]unicast")
+                node.client_send("data//"+line+"//appendix//test",client)
+            time.sleep(0.1)
+                
     return True
 
 def pause(para = 0b001):    # (reserve) (reserve) (1 broadcast; 0 don't broadcast)
@@ -339,6 +367,15 @@ def ShowStatus():
         sep="")
     blockchain.ShowStatus(1)
 
+def Require():
+    node.broadcast("require//test//appendix//test")
+
+def Who():
+    node.broadcast("require//who")
+
+def ResponseWho(client):
+    print("(debug)[ResponseWho]start ")
+    node.client_send("response//"+str(node.server_ip)+":"+str(node.server_port),client)
 
 if __name__ == "__main__":
     init()
@@ -347,10 +384,9 @@ if __name__ == "__main__":
 
     #run
     blockchain.run(node.server_port)
-
     while STOP == False:
         
-        if(node.server_port != 5003 or True): msg = input()   #阻塞
+        if(node.server_port != 5003): msg = input()   #阻塞
         else:
             msg = "tesdfsefsasdf"
             time.sleep(0.5)
@@ -392,7 +428,9 @@ if __name__ == "__main__":
         elif(msg == "data"):
             send_data()
         elif(msg == "test"):
-            node.send_to_groundstation()
+            Require()
+        elif(msg == "show memberlist"):
+            node.show_memberlist()
         else:
             pass
 
@@ -410,7 +448,7 @@ if __name__ == "__main__":
     print("[main.end]blockchain.blockqueue = ",blockchain.blockqueue)
     print("[main.end]len of blockchain.blockqueue = ",len(blockchain.blockqueue))
     print("===end===")
-    
+
 '''
 sdk you by chen,pin-jui
 '''

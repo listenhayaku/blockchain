@@ -27,6 +27,8 @@ class Node():
         self.server_data = []   #接收到所有資料都放入此佇列
             #client
         self.client_list_server = []   #client(連接別人) 列表
+        
+        self.member_list = [] #整合
 
         #init
         self.server_init()
@@ -35,7 +37,6 @@ class Node():
 #init
 #==============================================
 #server
-
     def server_init(self):
         self.server = socket.socket(socket.AF_INET,socket.SOCK_STREAM)
         self.server_ip = socket.gethostbyname(socket.gethostname())
@@ -60,9 +61,44 @@ class Node():
                 print("[server_listen]accept ",addr)
                 client.send(("welcome! I'm "+str(self.server_ip)+" "+str(self.server_port)).encode("utf-8"))
 
-                t = threading.Thread(target = self.server_recv_runner,args = (client,))
-                t.start()
+
                 self.server_list_client.append(client)
+                rec = client.recv(1024).decode("utf-8").split("//")
+                print("(debug)[server_listen]rec:",rec)
+                
+                if(rec[0] == "response"):
+                    if(rec[1].split(":")[0] == "GCS"):
+                        counter = 0
+                        for _ in self.member_list:
+                            if("GCS" in _.keys()): counter += 1
+                        if(counter == 0):   #代表列表裡沒有這個key的字典
+                            print("(debug)[server_listen]haven't exist")
+                            self.member_list.append({"GCS":{"server":client,"client":None}})
+                        else:
+                            print("(debug)[server_listen]have exist")
+                    else:
+                        ip = rec[1].split(":")[0]
+                        port = rec[1].split(":")[1]
+                        print("(debug)[server_listen]ip:",ip,"port:",port)
+                        counter = 0
+                        for _ in self.member_list:
+                            if("{ip:}:{port}".format(ip = ip,port = port) in _.keys()): counter += 1
+                        
+                        if(counter == 0):   #代表列表裡沒有這個key的字典
+                            print("(debug)[server_listen]haven't exist")
+                            self.member_list.append({"{ip:}:{port}".format(ip = ip,port = port):{"server":client,"client":None}})
+                        else:
+                            print("(debug)[server_listen]have exist")
+                            for _ in self.member_list:
+                                if("{ip}:{port}".format(ip = ip,port = port) in _.keys()):
+                                    _["{ip}:{port}".format(ip = ip,port = port)]["server"] = client
+
+                else:
+                    continue
+
+
+                t = threading.Thread(target = self.server_recv_runner,args = (client,))
+                t.start()   #這個執行緒要在前面的recv之後才行
 
             except socket.timeout:
                 if self.STOP == True:
@@ -70,8 +106,8 @@ class Node():
                     self.server_data_recv_flag = "end"
                     break
 
-            except:
-                print("[server_listen]unknown error")
+            except Exception as e:
+                print("(error)[server_listen]e:",e)
 
     def server_recv_runner(self,client):
         while self.STOP == False:
@@ -90,6 +126,7 @@ class Node():
                 finally:
                     break
             
+            #print("(debug)[server_recv_runner]msg:",msg)
             spec = specification.specification(msg)
             if spec != False:
                 
@@ -122,9 +159,9 @@ class Node():
 
     def server_del_client(self,client):
         try:
-            self.server_list_client.remove(client)
-        except:
-            print("[server_del_client]error")
+            self.server_list_client.remove(client)           
+        except Exception as e:
+            print("(error)[server_del_client]e:",e)
 
     def server_retriever(self): #回傳前會阻塞
         while self.STOP == False:
@@ -136,11 +173,17 @@ class Node():
                     print("[server_retriever]error")
         return None
 
-    def server_send(self,msg = "",client = ""):
+    def server_send(self,msg = "",client = None):
         print("(debug)[node.server_send]start")
-        print("(debug)[node.server_send]server_list_client[0]",self.server_list_client[0])
-        self.server_list_client[0].send("(debug)[node.server_send]start".encode("utf-8"))
-        pass
+        if(type(msg) == str):
+            msg = msg.encode("utf-8")
+        elif(type(msg) == bytes):
+            pass
+        else:
+            return False
+        client.send(msg)
+        return True
+
 #server
 #==============================================
 #client
@@ -172,14 +215,28 @@ class Node():
                 else:
                     ip = self.server_ip
                 # debug mode
-
                 client.connect((ip,port))
-                #print("[node.client_init]client.connect(",ip,",",port,")")
-                break
+                #新增memberlist
+                print("(debug)[client_init]ip:",ip,"port:",port)
+                counter = 0
+                for _ in self.member_list:
+                    if("{ip:}:{port}".format(ip = ip,port = port) in _.keys()): counter += 1
+                if(counter == 0):   #代表列表裡沒有這個key的字典
+                    print("(debug)[server_listen]haven't exist")
+                    self.member_list.append({"{ip:}:{port}".format(ip = ip,port = port):{"server":None,"client":client}})
+                else:
+                    print("(debug)[server_listen]have exist")
+                    for _ in self.member_list:
+                        if("{ip}:{port}".format(ip = ip,port = port) in _.keys()):
+                            _["{ip}:{port}".format(ip = ip,port = port)]["client"] = client
+
+                client.send("response//{ip}:{port}".format(ip = self.server_ip,port = self.server_port).encode("utf-8"))
+
             except Exception as e:
                 print("[node.client_init]e:",e)
                 #print("[client_init]error:plz input angin!")
-                pass
+            finally:
+                break
         self.client_list_server.append(client)
         print("[node.client_init]connect done!")
 
@@ -190,8 +247,8 @@ class Node():
         msg = str(msg)
         try:
             client.send((msg).encode("utf-8"))
-        except:
-            print("[client_send]error")
+        except Exception as e:
+            print("(error)[client_send]e",e)
     
     def client_del(self,client = ""):
         if(client == ""):
@@ -202,21 +259,29 @@ class Node():
             return True
         except:
             print("[client_del]error")
-            return False        
+            return False
 
     def broadcast(self,msg = ""):
+        counter = 0
         for _ in self.client_list_server:
             self.client_send(msg,_)
 #client
 #==============================================
 #others
-    def send_to_groundstation(self,msg = "",client = ""):
-        pass
-        self.server_send()
-        #if(client == ""):
-            #print("[node.send_to_groundstation]no pass client!")
-        #else:
-            #self.server_send()
+    def send_to_groundstation(self,msg = ""):
+        try:
+            if(msg == ""):
+                print("(error)[node][send_to_groundstation]plz input msg")
+                return False    
+            for _ in self.member_list:
+                if(list(_.keys())[0] == "GCS"):
+                    self.server_send(msg,_[list(_.keys())[0]]["server"])
+                    print("(debug)[send_to_groundstation]msg:",msg,"to:",list(_.keys())[0])
+                    return True
+            print("(info)[node][send_to_groundstation]cannot find GCS")
+            return False
+        except Exception as e:
+            print("(error)[node][send_to_groundstation]e:",e)
 
     def stop(self):
         self.server_list_client = []
@@ -229,7 +294,32 @@ class Node():
     def show_clientlist(self):
         print("[show_clientlist]len of clientlist:",len(self.client_list_server))
         for _ in self.client_list_server: print("\t",_,sep="")
+    def show_memberlist(self):
+        print("(info)[show_memberlist]")
+        for _ in self.member_list:
+            print(_)
 
+    def GetPeerNameBySocket(self,client):
+        for _ in self.member_list:
+            if(_[list(_.keys())[0]]["server"] == client):
+                print("(info)[GetPeerNameBySocket]found")
+                return list(_.keys())[0]
+        print("(info)[GetPerrnameBySocket]not found")
+        return False
+
+    def GetSocketByMemberlistName(self,MemberlistName = None):
+        if(MemberlistName == None):
+            print("(error)[GetSocketByMemberlistName]MemberlistName is None")
+            return None
+        elif(MemberlistName == ""):
+            print("(error)[GetSocketByMemberlistName]MemberlistName is null str")
+            return None
+        for _ in self.member_list:
+            if(list(_.keys())[0] == MemberlistName):
+                print("(debug)[GetSocketByMemberlistName]_:",_)
+                return _[list(_.keys())[0]]["server"]
+        print("(info)[GetSocketByMemberlistName]not found")
+        return None     
 
 if __name__ == "__main__":
     try:
