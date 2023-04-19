@@ -1,13 +1,18 @@
 #from msilib.schema import Error
 #from typing import overload
+import os
+import sys
+sys.path.insert(0, os.getcwd()+"\\lib")
+import mylib
 from node import Node
 from blockchain import Blockchain
 from block import Block
 from data_parser import DataParser
 import time
 import threading
+import msvcrt
 #import appendix
-#import os
+
 import socket
 import random
 #import inspect
@@ -29,6 +34,9 @@ PAUSE = False
 node = Node()
 blockchain = Blockchain()
 data_parser = DataParser()
+mynonblockinginput = mylib.myNonBlockingInput()
+MODE = int(0)   #0 normal
+                #1 malicious
 #golbal variable
 
 def Beep():
@@ -176,6 +184,7 @@ def miner(blockchain):
 
 def retriever(node):
     global STOP
+    global MODE
     counter = 0
     anc_head = 0
     anc_tail = 0
@@ -234,6 +243,11 @@ def retriever(node):
                     resume(0b000)
                     print("[main.retriever]resume")
 
+                elif(data["msg"]["content"] == "switch mode"):
+                    if(node.GetPeerNameBySocket(data["source"]) == "GCS"):
+                        MODE ^= 1
+                    else:
+                        blockchain.Inc_malicious_score(data["source"])
                 else:   #這裡是以定義命列字串以外的 
                     blockchain.Inc_malicious_score(data["source"])
 
@@ -334,6 +348,14 @@ def pause(para = 0b001):    # (reserve) (reserve) (1 broadcast; 0 don't broadcas
     if(para & 0b001): node.broadcast("pause")
     blockchain.blockchain_pause()
 
+def Stop():
+    global STOP 
+    STOP = True
+    blockchain.blockchain_stop()
+
+    time.sleep(1)
+    node.stop()
+
 def resume(para = 0b001):
     print("(debug)[main.resume]start")
     global PAUSE
@@ -377,22 +399,14 @@ def ResponseWho(client):
     print("(debug)[ResponseWho]start ")
     node.client_send("response//"+str(node.server_ip)+":"+str(node.server_port),client)
 
-if __name__ == "__main__":
-    init()
-    
-    #flag
+def UserInput():
+    msg = ""
 
-    #run
-    blockchain.run(node.server_port)
-    while STOP == False:
-        
-        if(node.server_port != 5003): msg = input()   #阻塞
-        else:
-            msg = "tesdfsefsasdf"
-            time.sleep(0.5)
+    msg = mynonblockinginput.ReceiveInput()
 
+    if(msg != ""):
         if (msg == 'exit' or msg == "x"):
-            break
+            Stop()
         elif msg == "show blockchain":
             #blockchain.print_blockchain()
             blockchain.write_log(port = node.server_port)
@@ -420,7 +434,6 @@ if __name__ == "__main__":
         elif (msg == "status" or msg == "st"):
             ShowStatus()
         elif(msg == "send data"):
-            pass
             f = open("data.txt","r")
             buf = f.read()
             print("(debug)[main loop]buf:\n",buf)
@@ -436,19 +449,38 @@ if __name__ == "__main__":
 
         node.broadcast(msg)
 
-    blockchain.write_log(port = node.server_port,bDebug=False,show=False)   #auto show blockchain
+def MaliciousMode():
+    msg = "tesdfsefsasdf"
+    time.sleep(0.5)
+    node.broadcast(msg)
 
-    STOP = True
-    blockchain.blockchain_stop()
 
-    time.sleep(1)
-    node.stop()
+try:
+    if __name__ == "__main__":
+        init()
+        #flag
+        #run
+        blockchain.run(node.server_port)
+        while STOP == False:
+            if(MODE == 0):
+                UserInput()
+            elif(MODE == 1):
+                MaliciousMode()
+            else:
+                print("(error)[main]MODE is undefined")
 
-    print("===end===")
-    print("[main.end]blockchain.blockqueue = ",blockchain.blockqueue)
-    print("[main.end]len of blockchain.blockqueue = ",len(blockchain.blockqueue))
-    print("===end===")
 
+        blockchain.write_log(port = node.server_port,bDebug=False,show=False)   #auto show blockchain
+
+        Stop()
+
+        print("===end===")
+        print("[main.end]blockchain.blockqueue = ",blockchain.blockqueue)
+        print("[main.end]len of blockchain.blockqueue = ",len(blockchain.blockqueue))
+        print("===end===")
+except Exception as e:
+    print("(error)[main]e:",e)
+    os.system("pause")
 '''
 sdk you by chen,pin-jui
 '''
