@@ -10,7 +10,7 @@ run.bat -> driver.py -> runner.py (*4，依照driver裡面設定的數量) -> ma
 
 至此就會開啟四個節點
 
-#### 系統架構
+#### 系統架構簡介
 
 * 專案目錄
     > 主要存放啟動用程式
@@ -41,25 +41,30 @@ run.bat -> driver.py -> runner.py (*4，依照driver裡面設定的數量) -> ma
                 2. Parser方法: 解析資料
     * 沒有使用
         1. appendix.py
-
 * ./lib
     > lib
     * 有使用
         1. mylib.py: 定義函式庫
             1. myNonBlockingInput物件: 實現非阻塞讀取stdin，目前用在節點皆換成惡意攻擊模式時不能使用阻塞input
-
 * ./format
     > 記錄各個資料格式
 
-* 架構圖參考
+#### 全系統架構圖參考
 
 ![](img/img1.png)
 
+
 * 啟動程式後，會依照下圖
 
-![](img/code1.png)
-的方式呼叫`node.client_init(port)`進行連線
+    ![](img/code1.png)
+    的方式呼叫`node.client_init(port)`進行連線
 
+* 等待全部就緒後，會進入指令互動模式
+    
+    ![](img/cmd1.png)
+
+    在main.py之中，進入無窮迴圈，利用UserInput()函數已非阻塞的方式讀取stdin
+    此無窮迴圈會判斷STOP這個全域變數決定是否要終止，
 
 
 
