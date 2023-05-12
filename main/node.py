@@ -315,6 +315,7 @@ class Node():
             print("(error)[GetSocketByMemberlistName]MemberlistName is null str")
             return None
         for _ in self.member_list:
+            print("(debug)[GetSocketByMemberlistName]list(_.keys())[0]"+list(_.keys())[0]+"MemberlistName"+MemberlistName)
             if(list(_.keys())[0] == MemberlistName):
                 print("(debug)[GetSocketByMemberlistName]_:",_)
                 return _[list(_.keys())[0]]["server"]

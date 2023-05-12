@@ -149,6 +149,7 @@ def miner(blockchain):
         while(len(blockchain.blockqueue) >= 1 and STOP == False):
             #print("(debug)[main.miner]while start")
             block = blockchain.mine()
+            
             if block == False:  #代表有人先挖到 有更新
                 break
             #block.print_block("[main.miner]I mined a block")
@@ -177,6 +178,8 @@ def miner(blockchain):
                         blockchain.RECV_LEDGE = False
                         time.sleep(random.randint(3,10))
                 '''
+        
+
 
         #print("[main.miner]the len of blockqueue less than 1")
         time.sleep(1)
@@ -284,6 +287,8 @@ def retriever(node):
                     print("(debug)[retriever]who")
                     print("(debug)[retriever]require who source:",data["source"])
                     ResponseWho(data["source"])
+                elif(data["msg"]["content"] == "ledge"):
+                   send_ledge_to_GCS() 
                 pass
             elif data["msg"]["tag"] == "response":
                 pass
@@ -323,6 +328,13 @@ def new_block(auto = False):
             time.sleep(0.3)
 
 def send_data(client = None):
+    global lon 
+    global lat 
+    global vol 
+    global amp 
+    global per
+    timestamp = time.strftime("%H:%M:%S", time.localtime())
+    info = str(timestamp) + "," + str( (lat + 100) // 1000 ) + "," + str( (lon + 100) // 1000) + "," + str( (vol + 10) // 100 ) + "," + str( (amp +10) // 100) + "," + str(per - 0.5) 
     ret = data_parser.Check()
     if(ret == False):
         #print("(debug)[main.send_data]enter where i don't want")
@@ -331,24 +343,42 @@ def send_data(client = None):
         return False
     else:
         #print("(deubg)[main.send_data]enter where i want")
-        for line in ret:
-            if(client == None):
-                print("(debug)[send_data]broadcast")
-                node.broadcast("data//"+line+"//appendix//test")
-            else:
-                print("(debug)[send_data]unicast")
-                node.client_send("data//"+line+"//appendix//test",client)
-            time.sleep(0.1)
+        if(client == None):
+            node.broadcast("data//"+info+"//appendix//test")
+        else:
+            node.client_send("data//"+info+"//appendix//test",client)
+
                 
     return True
+
+def send_ledge_to_GCS():    #GCS請求帳本
+    client = node.GetSocketByMemberlistName("GCS")
+    if(type(client) != socket.socket and client != None):
+        return False
+    elif(client != None):
+        buffer = str()
+        buffer = "[send_ledge_to_GCS]start"
+        node.send_to_groundstation("GCS_ledge//"+"[send_ledge_to_GCS]start"+"//appendix//test")
+        for _ in blockchain.chain:
+            buffer += _.print_block(show=False)
+            node.send_to_groundstation("GCS_ledge//"+_.print_block(show=False)+"//appendix//test")
+            time.sleep(0.1)
+        buffer += "[send_ledge_to_GCS]end"
+        node.send_to_groundstation("GCS_ledge//"+"[send_ledge_to_GCS]end"+"//appendix//test")
+        print("(debug)[send_ledge_to_GCS]buffer:",buffer)
+        
+    else:
+        return False
 
 def pause(para = 0b001):    # (reserve) (reserve) (1 broadcast; 0 don't broadcast)
     global PAUSE
     PAUSE = True
+    send_ledge_to_GCS()
     if(para & 0b001): node.broadcast("pause")
     blockchain.blockchain_pause()
 
 def Stop():
+    print("(info)[main][Stop]start")
     global STOP 
     STOP = True
     blockchain.blockchain_stop()
@@ -444,8 +474,11 @@ def UserInput():
             Require()
         elif(msg == "show memberlist"):
             node.show_memberlist()
+        elif(msg =="GCS_ledge"):
+            send_ledge_to_GCS()
         else:
             pass
+            
 
         node.broadcast(msg)
 
@@ -454,12 +487,18 @@ def MaliciousMode():
     time.sleep(0.5)
     node.broadcast(msg)
 
-
 try:
     if __name__ == "__main__":
         init()
         #flag
         #run
+        #uav parameter function
+        lon = 121333
+        lat = 24333
+        vol = 1522
+        amp = 772
+        per = 90
+
         blockchain.run(node.server_port)
         while STOP == False:
             if(MODE == 0):

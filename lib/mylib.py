@@ -9,10 +9,13 @@ class myNonBlockingInput():
 
     def ReceiveInput(self):
         if(msvcrt.kbhit()):
-            self.buffer += msvcrt.getch().decode("utf-8")
+            char = msvcrt.getch().decode("utf-8")
+            self.buffer += char
+            print(char,end="")
         if(len(self.buffer) > 0 and self.buffer[-1] == '\r'):
-            self.ret = self.buffer
+            self.ret = self.buffer[0:-1]
             self.buffer = ""
+            print(self.ret)
             return self.ret
         else: return ""
 
