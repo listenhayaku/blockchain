@@ -1,0 +1,10 @@
+====block====debug:remove_blockqueue
+id:0
+timestamp:1684426296.12
+nonce:2491629858
+prev_hash:00006d8ced7fbc9605796bf8f15c9e9572d6894fdad2a72a9f24fe867710fcb7
+information.data:test 9 port 5003
+source:172.30.0.90:5003
+=============
+hash:4885e052c37fbb9b91d4f598554c6ac775cd7c995d496a2db243fdcb53854646
+=============

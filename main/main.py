@@ -37,7 +37,13 @@ data_parser = DataParser()
 mynonblockinginput = mylib.myNonBlockingInput()
 MODE = int(0)   #0 normal
                 #1 malicious
+lon = 121113
+lat = 24333
+vol = 1522
+amp = 772
+per = 900
 #golbal variable
+
 
 def Beep():
     winsound.Beep(440,500)
@@ -298,7 +304,7 @@ def retriever(node):
 
         blockchain.MinusAll_malicious_score(1)
         for x in blockchain.malicious_score:
-            if(x["score"] > 100):
+            if(x["score"] > 40):
                 node.server_del_client(x["client"])
                 tempclient = x["client"]
                 name = node.GetPeerNameBySocket(tempclient)
@@ -333,8 +339,13 @@ def send_data(client = None):
     global vol 
     global amp 
     global per
+    lat = lat + 10
+    lon = lon + 10
+    vol = vol + 10
+    amp = amp + 10
+    per = per - 3
     timestamp = time.strftime("%H:%M:%S", time.localtime())
-    info = str(timestamp) + "," + str( (lat + 100) // 1000 ) + "," + str( (lon + 100) // 1000) + "," + str( (vol + 10) // 100 ) + "," + str( (amp +10) // 100) + "," + str(per - 0.5) 
+    info = "time:" + str(timestamp) + ",lat:" + str( float(lat) / 1000) + ",lon:" + str( float(lon) / 1000) + ",vol:" + str( float(vol) / 100 ) + ",amp:" + str( float(amp) / 100) + ",per:" + str(float(per) / 10) + "\n"
     ret = data_parser.Check()
     if(ret == False):
         #print("(debug)[main.send_data]enter where i don't want")
@@ -347,6 +358,7 @@ def send_data(client = None):
             node.broadcast("data//"+info+"//appendix//test")
         else:
             node.client_send("data//"+info+"//appendix//test",client)
+        print("debug_main",info)
 
                 
     return True
@@ -492,12 +504,6 @@ try:
         init()
         #flag
         #run
-        #uav parameter function
-        lon = 121333
-        lat = 24333
-        vol = 1522
-        amp = 772
-        per = 90
 
         blockchain.run(node.server_port)
         while STOP == False:

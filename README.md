@@ -1,5 +1,7 @@
 ### 用法
 
+#### windows下
+
 ```bat=
 run.bat
 ```
@@ -10,7 +12,7 @@ run.bat -> driver.py -> runner.py (*4，依照driver裡面設定的數量) -> ma
 
 至此就會開啟四個節點
 
-#### 系統架構簡介
+### 系統架構簡介
 
 * 專案目錄
     > 主要存放啟動用程式
@@ -53,6 +55,7 @@ run.bat -> driver.py -> runner.py (*4，依照driver裡面設定的數量) -> ma
 
 ![](img/img1.png)
 
+各形成運行介紹
 
 * 啟動程式後，會依照下圖
 
