@@ -32,7 +32,7 @@ run.bat -> driver.py -> runner.py (*4，依照driver裡面設定的數量) -> ma
     > 自動產生區塊，主要是debug所使用
 6. `show serverlist`
     > 顯示 node 的server物件列表
-7. `show clientlist
+7. `show clientlist`
     > 顯示 node 的client物件列表
 8. `show others ledge,ol`
     > 顯示 別人傳過來的帳本
@@ -54,6 +54,8 @@ run.bat -> driver.py -> runner.py (*4，依照driver裡面設定的數量) -> ma
     > 顯示node的整合後節點資訊
 17. `GCS_ledge`
     > 傳送帳本給ground control station
+
+
 
 ### 系統架構簡介
 
@@ -97,6 +99,10 @@ run.bat -> driver.py -> runner.py (*4，依照driver裡面設定的數量) -> ma
 #### 全系統架構圖參考
 
 ![](img/img1.png)
+
+#### 系統流程圖參考
+
+![](img/img2.png)
 
 #### 各行程運行介紹
 
