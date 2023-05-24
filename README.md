@@ -1,6 +1,6 @@
 ### 用法
 
-#### windows下
+#### windows下啟動
 
 ```bat=
 run.bat
@@ -11,6 +11,49 @@ run.bat
 run.bat -> driver.py -> runner.py (*4，依照driver裡面設定的數量) -> main.py
 
 至此就會開啟四個節點
+
+### 指令
+
+程式啟動後目前有兩種模式
+1. 一般指令模式
+2. 惡意攻擊模式
+
+在一般指令模式下可以由使用者在主控台輸入指令字串進行操控
+    
+1. `exit,x`
+    > 結束程式
+2. `show blockchain`
+    > 在主控台上顯示帳本內容，並且入log
+3. `show blockqueue`
+    > 顯示代挖佇列物件
+4. `show block`
+    > 縣市代挖佇列區塊內容
+5. `new block,nb`
+    > 自動產生區塊，主要是debug所使用
+6. `show serverlist`
+    > 顯示 node 的server物件列表
+7. `show clientlist
+    > 顯示 node 的client物件列表
+8. `show others ledge,ol`
+    > 顯示 別人傳過來的帳本
+9. `send`
+    > 廣播帳本給別人
+10. `pause`
+    > 全系統暫停
+11. `resume,rs`
+    > 全系統從暫停恢復運行
+12. `status,st`
+    > 顯示狀態
+13. `send data`
+    > 廣播在本地的data
+14. `data`
+    > 傳送在本地的data
+15. `test`
+    > 測試用途
+16. `show memberlist`
+    > 顯示node的整合後節點資訊
+17. `GCS_ledge`
+    > 傳送帳本給ground control station
 
 ### 系統架構簡介
 
@@ -55,9 +98,9 @@ run.bat -> driver.py -> runner.py (*4，依照driver裡面設定的數量) -> ma
 
 ![](img/img1.png)
 
-各形成運行介紹
+#### 各行程運行介紹
 
-* 啟動程式後，會依照下圖
+* 啟動程式後，主程式會依照下圖
 
     ![](img/code1.png)
     的方式呼叫`node.client_init(port)`進行連線
